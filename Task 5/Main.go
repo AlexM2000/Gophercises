@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"./Link"
+	"Gophercises/Task 4/Link"
 )
 
 func main() {
