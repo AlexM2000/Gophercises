@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 
 	"./Link"
 )
@@ -16,4 +18,11 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(links)
+	resp, err := http.Get("https://www.google.by")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(body)
 }
