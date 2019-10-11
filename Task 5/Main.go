@@ -28,7 +28,7 @@ func HTMLWriteToFile(url string, filename string) {
 
 func main() {
 	HTMLfilePointer := flag.String("file", "htmlFormat.html",
-		"File which contains paths and destinations in YAML format (default htmlFormat.html)")
+		"File which contains paths and destinations (default htmlFormat.html)")
 	_ = flag.String("URL", "https://www.calhoun.io/",
 		"URL, for which need to create sitemap (default https://www.calhoun.io/)")
 	flag.Parse()
