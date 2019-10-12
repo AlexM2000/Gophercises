@@ -56,7 +56,7 @@ func outputToXMLfile(links []string, filename string) {
 func main() {
 	HTMLfilePointer := flag.String("file", "htmlFormat.html",
 		"File which contains paths and destinations (default htmlFormat.html)")
-	URLpointer := flag.String("URL", "http://www.sitemaps.org/schemas/sitemap/0.9",
+	URLpointer := flag.String("URL", "http://www.voprospsyha.narod.ru/", //Сайт нашего преподавателя по психологии хехе
 		"URL, for which need to create sitemap (default http://www.sitemaps.org/schemas/sitemap/0.9)")
 	flag.Parse()
 	links := GetSitemap(*URLpointer, *HTMLfilePointer)
@@ -114,21 +114,22 @@ func GetSitemap(URL string, filename string) []string {
 	}
 	baseURLstr := baseURL.String()
 	linksFilteredHref := getFilteredLinksHref(links, baseURLstr)
-	filtered := linksFilteredHref[:0]
-	for _, v := range linksFilteredHref {
+	length := len(linksFilteredHref)
+	for i := 0; i < length; i++ {
 		fmt.Println(linksFilteredHref)
-		if _, ok := visited[v]; !ok {
-			visited[v] = true
-			tempLinks := getLinksInPage(v, filename)
+		if _, ok := visited[linksFilteredHref[i]]; !ok {
+			visited[linksFilteredHref[i]] = true
+			tempLinks := getLinksInPage(linksFilteredHref[i], filename)
 			tempFilteredLinks := getFilteredLinksHref(tempLinks, baseURLstr)
 			fmt.Println(tempFilteredLinks)
 			for _, v2 := range tempFilteredLinks {
 				if _, ok := appended[v2]; !ok {
-					filtered = append(filtered, v2)
+					linksFilteredHref = append(linksFilteredHref, v2)
 					appended[v2] = true
 				}
 			}
 		}
+		length = len(linksFilteredHref)
 	}
-	return filtered
+	return linksFilteredHref
 }
