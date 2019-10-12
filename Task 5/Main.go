@@ -1,23 +1,26 @@
 package main
 
 import (
+	"encoding/xml"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"./Link"
 )
 
 type location struct {
-	URL string `xml:"loc"`
+	Value string `xml:"loc"`
 }
 
 type urlset struct {
-	locs []location `xml:"url`
+	Locs []location `xml:"url"`
 }
 
 func HTMLWriteToFile(URL string, filename string) {
@@ -36,13 +39,28 @@ func HTMLWriteToFile(URL string, filename string) {
 	}
 }
 
+func outputToXMLfile(links []string, filename string) {
+	URLS := urlset{}
+	for _, link := range links {
+		URLS.Locs = append(URLS.Locs, location{link})
+	}
+	file, _ := os.Create(filename)
+	xmlWriter := io.Writer(file)
+	enc := xml.NewEncoder(xmlWriter)
+	enc.Indent("  ", "    ")
+	if err := enc.Encode(URLS); err != nil {
+		fmt.Printf("error: %v\n", err)
+	}
+}
+
 func main() {
 	HTMLfilePointer := flag.String("file", "htmlFormat.html",
 		"File which contains paths and destinations (default htmlFormat.html)")
-	URLpointer := flag.String("URL", "https://www.calhoun.io/",
-		"URL, for which need to create sitemap (default https://www.calhoun.io/)")
+	URLpointer := flag.String("URL", "http://www.sitemaps.org/schemas/sitemap/0.9",
+		"URL, for which need to create sitemap (default http://www.sitemaps.org/schemas/sitemap/0.9)")
 	flag.Parse()
-	GetSitemap(*URLpointer, *HTMLfilePointer)
+	links := GetSitemap(*URLpointer, *HTMLfilePointer)
+	outputToXMLfile(links, "Output.xml")
 }
 
 func getLinksInPage(URL string, filename string) []Link.Link {
@@ -85,32 +103,32 @@ func getFilteredLinksHref(links []Link.Link, baseURL string) []string {
 	return linksFilteredHref
 }
 
-func GetSitemap(URL string, filename string) {
+func GetSitemap(URL string, filename string) []string {
 	visited := make(map[string]bool)
 	appended := make(map[string]bool)
 	links := getLinksInPage(URL, filename)
 	reqURL := getReqURL(URL)
-	fmt.Println(reqURL)
 	baseURL := &url.URL{
 		Scheme: reqURL.Scheme,
 		Host:   reqURL.Host,
 	}
 	baseURLstr := baseURL.String()
-	fmt.Println(baseURLstr)
 	linksFilteredHref := getFilteredLinksHref(links, baseURLstr)
-	fmt.Println(linksFilteredHref)
+	filtered := linksFilteredHref[:0]
 	for _, v := range linksFilteredHref {
+		fmt.Println(linksFilteredHref)
 		if _, ok := visited[v]; !ok {
+			visited[v] = true
 			tempLinks := getLinksInPage(v, filename)
 			tempFilteredLinks := getFilteredLinksHref(tempLinks, baseURLstr)
+			fmt.Println(tempFilteredLinks)
 			for _, v2 := range tempFilteredLinks {
 				if _, ok := appended[v2]; !ok {
-					linksFilteredHref = append(linksFilteredHref, v2)
+					filtered = append(filtered, v2)
 					appended[v2] = true
 				}
 			}
-			visited[v] = true
 		}
 	}
-	fmt.Println(linksFilteredHref)
+	return filtered
 }
