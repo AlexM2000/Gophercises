@@ -1,513 +1,116 @@
-<!DOCTYPE html>
-<html>
-  <head>
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.sitemaps.org/schemas/sitemap/0.9"
+            xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+            elementFormDefault="qualified">
+  <xsd:annotation>
+    <xsd:documentation>
+      XML Schema for Sitemap files.
+      Last Modifed 2008-03-26
+    </xsd:documentation>
+  </xsd:annotation>
 
-    
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <meta name="description" content="...">
-    <meta name="keywords" content="learn golang go gopher coding">
-    <meta name="author" content="Jon Calhoun">
+  <xsd:element name="urlset">
+    <xsd:annotation>
+      <xsd:documentation>
+        Container for a set of up to 50,000 document elements.
+        This is the root element of the XML file.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="strict"/>
+        <xsd:element name="url" type="tUrl" maxOccurs="unbounded"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
 
-    
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=00QO5d6276">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=00QO5d6276">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=00QO5d6276">
-    <link rel="manifest" href="/manifest.json?v=00QO5d6276">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg?v=00QO5d6276" color="#38c172">
-    <link rel="shortcut icon" href="/favicon.ico?v=00QO5d6276">
-    <meta name="apple-mobile-web-app-title" content="Calhoun.io">
-    <meta name="application-name" content="Calhoun.io">
-    <meta name="theme-color" content="#38c172">
+  <xsd:complexType name="tUrl">
+    <xsd:annotation>
+      <xsd:documentation>
+        Container for the data needed to describe a document to crawl.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="loc" type="tLoc"/>
+      <xsd:element name="lastmod" type="tLastmod" minOccurs="0"/>
+      <xsd:element name="changefreq" type="tChangeFreq" minOccurs="0"/>
+      <xsd:element name="priority" type="tPriority" minOccurs="0"/>
+      <xsd:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="strict"/>
+    </xsd:sequence>
+  </xsd:complexType>
 
-    
-    
-    <meta content="https://www.calhoun.io/img/social_share.png" property="og:image">
-    <meta content="Tags - Calhoun.io" property="og:title">
-    <meta content="article" property="og:type">
-    <meta content="https://www.calhoun.io" property="og:url">
-    <meta content="Calhoun.io" property="og:site_name">
-    <meta content="..." property="og:description">
+  <xsd:simpleType name="tLoc">
+    <xsd:annotation>
+      <xsd:documentation>
+        REQUIRED: The location URI of a document.
+        The URI must conform to RFC 2396 (http://www.ietf.org/rfc/rfc2396.txt).
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:anyURI">
+      <xsd:minLength value="12"/>
+      <xsd:maxLength value="2048"/>
+    </xsd:restriction>
+  </xsd:simpleType>
 
-    
-    <meta name="twitter:card" content="photo">
-    <meta name="twitter:site" content="@joncalhoun">
-    <meta name="twitter:creator" content="@joncalhoun">
-    <meta name="twitter:title" content="Tags - Calhoun.io">
-    <meta name="twitter:description" content="...">
-    <meta name="twitter:image" content="https://www.calhoun.io/img/social_share.png">
-    <meta name="twitter:url" content="https://www.calhoun.io/tags/">
+  <xsd:simpleType name="tLastmod">
+    <xsd:annotation>
+      <xsd:documentation>
+        OPTIONAL: The date the document was last modified. The date must conform
+        to the W3C DATETIME format (http://www.w3.org/TR/NOTE-datetime).
+        Example: 2005-05-10
+        Lastmod may also contain a timestamp.
+        Example: 2005-05-10T17:33:30+08:00
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:union>
+      <xsd:simpleType>
+        <xsd:restriction base="xsd:date"/>
+      </xsd:simpleType>
+      <xsd:simpleType>
+        <xsd:restriction base="xsd:dateTime"/>
+      </xsd:simpleType>
+    </xsd:union>
+  </xsd:simpleType>
 
-    
-    <meta charset="utf-8">
-    <title>Tags - Calhoun.io</title>
+  <xsd:simpleType name="tChangeFreq">
+    <xsd:annotation>
+      <xsd:documentation>
+        OPTIONAL: Indicates how frequently the content at a particular URL is
+        likely to change. The value "always" should be used to describe
+        documents that change each time they are accessed. The value "never"
+        should be used to describe archived URLs. Please note that web
+        crawlers may not necessarily crawl pages marked "always" more often.
+        Consider this element as a friendly suggestion and not a command.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:string">
+      <xsd:enumeration value="always"/>
+      <xsd:enumeration value="hourly"/>
+      <xsd:enumeration value="daily"/>
+      <xsd:enumeration value="weekly"/>
+      <xsd:enumeration value="monthly"/>
+      <xsd:enumeration value="yearly"/>
+      <xsd:enumeration value="never"/>
+    </xsd:restriction>
+  </xsd:simpleType>
 
-    <link rel="alternate" type="application/rss&#43;xml" href="https://www.calhoun.io/tags/rss/index.xml">
-    
+  <xsd:simpleType name="tPriority">
+    <xsd:annotation>
+      <xsd:documentation>
+        OPTIONAL: The priority of a particular URL relative to other pages
+        on the same site. The value for this element is a number between
+        0.0 and 1.0 where 0.0 identifies the lowest priority page(s).
+        The default priority of a page is 0.5. Priority is used to select
+        between pages on your site. Setting a priority of 1.0 for all URLs
+        will not help you, as the relative priority of pages on your site
+        is what will be considered.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:restriction base="xsd:decimal">
+      <xsd:minInclusive value="0.0"/>
+      <xsd:maxInclusive value="1.0"/>
+    </xsd:restriction>
+  </xsd:simpleType>
 
-    
-    <script src='https://www.google.com/recaptcha/api.js'></script>
-
-    
-    <link href="https://fonts.googleapis.com/css?family=Lusitana" rel="stylesheet">
-    
-    <link rel='stylesheet' type='text/css' href='https://d33wubrfki0l68.cloudfront.net/css/f0f0909655ccf779404925c82e57ad8401675c2e/css/styles.css'/>
-    
-    
-
-    <link rel="alternate" type="application/rss&#43;xml" href="https://www.calhoun.io/tags/rss/index.xml" title="Calhoun.io - Go for Everyone">
-  </head>
-  <body class="bg-grey-lighter">
-    <nav class="flex items-center justify-between bg-green p-0">
-      <div class="flex container  py-4 mx-auto border-none">
-        <div class="flex flex-no-shrink justify-start items-center text-white brand pr-4 px-6 sm:px-0">
-          <img class="mr-2 pb-2" src="https://d33wubrfki0l68.cloudfront.net/86966651b63272f0485ea4259a30f5d0985a4d66/21cd2/img/avatar.png" style="max-width: 40px;">
-          <a class="font-mono font-semibold text-3xl text-white hover:text-white" href="/">
-            Calhoun.io
-          </a>
-        </div>
-        <div class="hidden sm:flex sm:flex-grow md:hidden"></div>
-        <div class="hidden md:flex md:flex-grow text-md items-center pl-6">
-          <a href="/" class="text-green-lightest hover:text-white mr-4">
-            Recent Articles
-          </a>
-          <a href="/series" class="hidden md:inline-block text-green-lightest hover:text-white mr-4">
-            Multipart Articles (Series)
-          </a>
-          <a href="/about" class="text-green-lightest hover:text-white">
-            About
-          </a>
-        </div>
-        <div class="hidden sm:flex sm:flex-initial text-red items-center">
-          <a href="/courses" class="text-md px-4 py-2 rounded text-green-lightest no-underline bg-green hover:border-transparent hover:bg-green-dark hover:text-white">Go Courses</a>
-        </div>
-      </div>
-    </nav>
-    
-    <div class="block lg:flex lg:flew-wrap items-center container mx-auto border-none px-6 sm:px-0">
-      <div class="flex flex-wrap w-full md:w-auto py-6">
-        <div class="flex flex-initial">
-          <a class="text-yellow-darker hover:text-yellow-darkest bg-yellow-lighter p-2" href="https://www.usegolang.com">Learn Web Development with Go</a>
-        </div>
-        <div class="flex flex-initial">
-          <a class="text-grey-darker hover:text-grey-darkest p-2" href="https://gophercises.com">Practice Go with Gophercises</a>
-        </div>
-      </div>
-      
-
-      
-
-    </div>
-
-<div class="container mx-auto mb-8 lg:flex">
-  <div class="w-full bg-white shadow-md rounded pb-8">
-    <h1 class="py-6 border-b-2 border-grey-lighter text-grey-darker font-headline">
-      Tags
-    </h1>
-    <br>
-    <div class="flex flex-wrap mb-4">
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/tdd/">tdd</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/testing/">testing</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/beginner/">beginner</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/nil/">nil</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/interfaces/">interfaces</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/code-design/">code design</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/gophercises/">gophercises</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/html/">html</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/talks/">talks</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/templates/">templates</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/api/">api</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/json/">json</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/web-development/">web-development</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/net/http/">net/http</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/gotime/">gotime</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/podcasts/">podcasts</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/generics/">generics</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/strings/">strings</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/dependency-management/">dependency-management</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/vgo/">vgo</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/errors/">errors</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/named-return-variables/">named-return-variables</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/panic/recover/">panic/recover</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/caddy/">caddy</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/cookies/">cookies</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/closures/">closures</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/databases/">databases</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/functional-options/">functional options</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/orms/">ORMs</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/generation/">generation</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/postgresql/">PostgreSQL</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/sql/">SQL</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/security/">security</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/algorithms/">algorithms</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/data-structures/">data structures</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/mvc/">mvc</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/lets-learn-algorithms/">Lets-Learn-Algorithms</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/graph-theory/">graph theory</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/trees/">trees</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/dfs/">dfs</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/rant/">rant</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/arrays/">arrays</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/rand/">rand</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/slices/">slices</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/encoding/">encoding</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/context/">context</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/middleware/">middleware</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/capacity/">capacity</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/bcrypt/">bcrypt</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/hashing/">hashing</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/tools/">tools</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/bubble-sort/">bubble-sort</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/binary-serach/">binary-serach</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/search/">search</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/sorting/">sorting</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/macosx/">MacOSX</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/ubuntu/">Ubuntu</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/bytes/">bytes</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/remote-work/">remote-work</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/routing/">routing</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/sublime-text/">sublime-text</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/channels/">channels</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/concurrency/">concurrency</a>
-      </div>
-      
-      <div class="w-full md:w-1/2 lg:w-1/3 px-6 py-1">
-        <a class="text-lg" href="https://www.calhoun.io/tags/goroutines/">goroutines</a>
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-  
-<div class="container py-8 mx-auto bg-white shadow-md rounded my-8 border-t-8 border-b-2 border-green shadow-md" id="subscribe">
-  <div class="block md:flex md:w-full">
-    <div class="border-b-2 border-grey-lightest pb-4 md:pb-2 md:border-b-0 md:border-r-2 md:border-grey-light md:w-3/5">
-      <h3 class="block">
-        Learn Web Development with Go!
-      </h3>
-      
-      <p class="block text-md text-grey-darker">
-        Sign up for my mailing list and I'll send you a FREE sample from my course - Web Development with Go. The sample includes three chapters from the book, and over 2.5 hours of screencasts.
-      </p>
-      
-      <p class="block text-md text-grey-darker">
-        You will also receive notifications when I release new articles, along with other freebies that I only share with my mailing list.
-      </p>
-      
-    </div>
-    
-    <form class="bg-white md:w-2/5 px-6 pt-4 pb-2 mt-4 md:my-auto" action="https://www.getdrip.com/forms/50597771/submissions" method="post" data-drip-embedded-form="50597771">
-      <div class="mb-4">
-        <label class="block text-grey-darker text-sm font-bold mb-2" for="fields[email]">
-          Email Address
-        </label>
-        <input class="bg-grey-lighter appearance-none border-2 border-grey-lighter hover:border-green rounded w-full py-2 px-4 text-grey-darker" type="email" placeholder="you@example.com" name="fields[email]">
-      </div>
-      <div class="g-recaptcha" data-sitekey="6LfuZxsUAAAAALrUg0iBaL1G1ubg8fl72zYU43sq"></div>
-
-      <div class="flex items-center pt-4">
-        <button class="shadow bg-green hover:bg-green-dark text-white font-bold py-2 px-4 rounded w-full" type="submit">
-          Subscribe
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-  <div class="container mx-auto border-none py-0 lg:flex" id="about">
-  <div class="block w-full lg:flex ">
-    <div class="h-48 lg:h-auto lg:w-48 flex-none bg-cover rounded-t lg:rounded-t-none lg:rounded-l text-center overflow-hidden" style="background-image: url('/img/truck_sm.jpg')" title="Green forested area">
-    </div>
-    <div class="border-r border-b border-l border-grey-light lg:border-l-0 lg:border-t lg:border-grey-light bg-white rounded-b lg:rounded-b-none lg:rounded-r p-4 flex flex-col justify-between leading-normal">
-      <div class="mb-2">
-        <div class="mb-2 items-center px-6 flex">
-          <img class="w-16 h-16 rounded-full mr-4" src="//www.gravatar.com/avatar/7f6933474b11029553700ca296b0cd48?s=150&d=mm&r=x" alt="Avatar of Jon Calhoun">
-          <div>
-            
-            <div class="text-xs text-grey-dark">Articles and Tutorials by</div>
-            
-            
-            <div class="text-grey-darkest font-bold text-xl">Jon Calhoun</div>
-            <div class="flex">
-              <a class="twitter-follow-button" href="https://twitter.com/joncalhoun" data-size="small">
-              Follow @joncalhoun</a>
-            </div>
-          </div>
-        </div>
-        <div class="text-grey-darker text-base">
-          <p class="py-1">
-            Jon Calhoun is a full stack web developer who also teaches about Go, web development, algorithms, and anything programming related. He also consults for other companies who have development needs. (If you need some development work done, <a href="mailto:jon@calhoun.io">get in touch</a>!)
-          </p>
-          <p class="py-1">
-            Jon is a co-founder of EasyPost, a shipping API that many fortune 500 companies use to power their shipping infrastructure, and prior to founding EasyPost he worked at google as a software engineer.
-          </p>
-        </div>
-        <div class="text-grey-dark text-base pt-8">
-          <p class="py-1">
-            Jon's latest progress update:
-            
-              <a href="https://www.calhoun.io/progress/writing-course-notes/" class="">
-                Writing Course Notes
-              </a>
-            
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-</div>
-
-  <div class="container mx-auto mt-8 pt-8 flex flex-wrap justify-center">
-    <a href="/" class="leading-loose mx-6 text-grey-dark hover:text-grey-darkest">Recent Articles</a>
-    <a href="/all/" class="leading-loose mx-6 text-grey-dark hover:text-grey-darkest">All Articles</a>
-    <a href="/series" class="leading-loose mx-6 text-grey-dark hover:text-grey-darkest">Mini-Series</a>
-    <a href="/progress/" class="leading-loose mx-6 text-grey-dark hover:text-grey-darkest">Progress Updates</a>
-    <a href="/tags/" class="leading-loose mx-6 text-grey-dark hover:text-grey-darkest">Tags</a>
-    <a href="/about" class="leading-loose mx-6 text-grey-dark hover:text-grey-darkest">About Me</a>
-    <a href="/courses" class="leading-loose mx-6 text-grey-dark hover:text-grey-darkest">Go Courses</a>
-  </div>
-  <p class="pb-8 text-center text-grey text-xs my-8">
-    ©2018 Jonathan Calhoun. All rights reserved.
-  </p>
-  <div class="py-6"></div>
-
-  
-  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-  
-<script type="text/javascript">
-  var _dcq = _dcq || [];
-  var _dcs = _dcs || {};
-  _dcs.account = '1687768';
-
-  (function() {
-    var dc = document.createElement('script');
-    dc.type = 'text/javascript'; dc.async = true;
-    dc.src = '//tag.getdrip.com/1687768.js';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(dc, s);
-  })();
-</script>
-
-  
-<script>
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-ga('create', 'UA-59403136-1', 'auto');
-ga('require', 'linkid');
-ga('send', 'pageview');
-</script>
-
-
-  
-<script type="text/javascript">
-  (function() {
-    window._pa = window._pa || {};
-    
-    
-    
-    var pa = document.createElement('script'); pa.type = 'text/javascript'; pa.async = true;
-    pa.src = ('https:' == document.location.protocol ? 'https:' : 'http:') + "//tag.marinsm.com/serve/582ec6f8a4d6b78fd1000015.js";
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(pa, s);
-  })();
-</script>
-
-  
-  
-</body>
-</html>
-
+</xsd:schema>
