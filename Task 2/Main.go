@@ -20,7 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Started serving")
+	fmt.Println("Started serving port 8080")
 	err = http.ListenAndServe(":8080", yamlHandler)
 	if err != nil {
 		log.Fatal(err)
