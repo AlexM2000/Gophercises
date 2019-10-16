@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -12,16 +11,16 @@ import (
 )
 
 func main() {
-	yamlFile := flag.String("yamlFile", "httpRequests.yaml",
+	yamlFilePointer := flag.String("yamlFile", "httpRequests.yaml",
 		"File which contains paths and destinations in YAML format (default httpRequests.yaml)")
 	flag.Parse()
 	mux := http.NewServeMux()
-	yamlHandler, err := YAMLHandler(*yamlFile, mux)
+	yamlHandler, err := YAMLHandler(*yamlFilePointer, mux)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Started serving port 8080")
-	err = http.ListenAndServe(":8080", yamlHandler)
+	fmt.Println("Started serving port 8000")
+	err = http.ListenAndServe(":8000", yamlHandler)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,18 +46,24 @@ func YAMLHandler(filename string, fallback http.Handler) (http.HandlerFunc, erro
 }
 
 func parseYaml(filename string) (map[string]string, error) {
-	pathUrls := make(map[string]string)
+	PathUrls := make(map[string]string)
 	yamlFile, err := ioutil.ReadFile(filename)
-	r := bytes.NewReader(yamlFile)
-	dec := yaml.NewDecoder(r)
-	var pathUrl pathAndUrl
-	for dec.Decode(&pathUrl) == nil {
-		pathUrls[pathUrl.Path] = pathUrl.URL
+	if err != nil {
+		log.Fatal(err)
 	}
-	return pathUrls, err
+	var PathUrl []PathAndUrl
+	err = yaml.Unmarshal(yamlFile, &PathUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(PathUrl)
+	for _, url := range PathUrl {
+		PathUrls[url.Path] = url.URL
+	}
+	return PathUrls, err
 }
 
-type pathAndUrl struct {
+type PathAndUrl struct {
 	Path string `yaml:"path"`
 	URL  string `yaml:"url"`
 }
