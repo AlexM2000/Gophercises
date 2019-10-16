@@ -12,11 +12,11 @@ import (
 )
 
 func main() {
-	yamlFilePointer := flag.String("yamlFile", "httpRequests.yaml",
+	yamlFile := flag.String("yamlFile", "httpRequests.yaml",
 		"File which contains paths and destinations in YAML format (default httpRequests.yaml)")
 	flag.Parse()
 	mux := http.NewServeMux()
-	yamlHandler, err := YAMLHandler(*yamlFilePointer, mux)
+	yamlHandler, err := YAMLHandler(*yamlFile, mux)
 	if err != nil {
 		log.Fatal(err)
 	}
