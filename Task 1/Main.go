@@ -11,30 +11,30 @@ import (
 )
 
 func main() {
-    csvFilenamePointer := flag.String("csv", "problems.csv",
-    	"a csv file in the format of 'question,anwser' (default problems.csv")
-    limitPointer := flag.Int("limit", 30,"the time for the quiz in seconds (default 30)")
-    flag.Parse()
-    quizQuestions := make(map[string]string)
-    timer := time.NewTimer(time.Duration(*limitPointer) * time.Second)
+	csvFilename := flag.String("csv", "problems.csv",
+		"a csv file in the format of 'question,anwser' (default problems.csv")
+	limit := flag.Int("limit", 30, "the time for the quiz in seconds (default 30)")
+	flag.Parse()
+	quizQuestions := make(map[string]string)
+	timer := time.NewTimer(time.Duration(*limit) * time.Second)
 
-    csvfile, err := os.Open(*csvFilenamePointer)
-    if err != nil {
-    	log.Fatal("Couldn't open csv file: ", err)
+	csvfile, err := os.Open(*csvFilename)
+	if err != nil {
+		log.Fatal("Couldn't open csv file: ", err)
 	}
-    r := csv.NewReader(csvfile)
-    for {
-    	record, err := r.Read()
-    	if err == io.EOF {
-    		break
+	r := csv.NewReader(csvfile)
+	for {
+		record, err := r.Read()
+		if err == io.EOF {
+			break
 		}
-    	if err != nil {
-    		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
 		}
-        quizQuestions[record[0]] = record[1]
+		quizQuestions[record[0]] = record[1]
 	}
-    var problemNum, userAnwser = 1, ""
-    for question, realAnswer := range quizQuestions {
+	var problemNum, userAnwser = 1, ""
+	for question, correctAnswer := range quizQuestions {
 		anwserCh := make(chan string)
 		go func() {
 			fmt.Print("Problem №", problemNum, ": ", question, " = ")
@@ -46,19 +46,18 @@ func main() {
 		}()
 		select {
 		case <-timer.C:
-			fmt.Println("You scored ", problemNum-1, " of ", len(quizQuestions)-1)
+			fmt.Printf("You scored %d of %d \n", problemNum-1, len(quizQuestions)-1)
 			return
 		case userAnwser := <-anwserCh:
-			if userAnwser != realAnswer {
+			if userAnwser != correctAnswer {
 				fmt.Println(userAnwser)
 				fmt.Println("You scored ", problemNum-1, " of ", len(quizQuestions)-1)
 				return
 			}
 			problemNum++
-			timer.Reset(time.Duration(*limitPointer) * time.Second)
+			timer.Reset(time.Duration(*limit) * time.Second)
 		}
 
 	}
-	fmt.Println("Congratulations! You scored ", len(quizQuestions)-1, " of ", len(quizQuestions)-1)
-	//Comment for pull request 
+	fmt.Printf("Congratulations! You scored %d of %d \n", len(quizQuestions)-1, len(quizQuestions)-1)
 }
