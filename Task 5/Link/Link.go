@@ -29,22 +29,32 @@ func ParseLinks(HTMLfilename string) ([]Link, error) {
 }
 
 func iterNode(n *html.Node) {
-	var link string
 	if n.Type == html.ElementNode && n.Data == "a" {
-		for _, a := range n.Attr {
-			if a.Key == "href" {
-				link = a.Val
-				for c := n.FirstChild; c != nil; c = c.NextSibling {
-					if c.Type == html.TextNode {
-						links = append(links, Link{link, c.Data})
-						break
-					}
-				}
-				break
-			}
-		}
+		iterateOnTagA(n)
 	}
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
 		iterNode(c)
+	}
+}
+
+func iterateOnTagA(n *html.Node) {
+	for _, a := range n.Attr {
+		iterateOnHref(a, n)
+	}
+}
+
+func iterateOnHref(a html.Attribute, n *html.Node) {
+	if a.Key == "href" {
+		link := a.Val
+		appendTextOfLink(a, n, link)
+	}
+}
+
+func appendTextOfLink(a html.Attribute, n *html.Node, link string) {
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		if c.Type == html.TextNode {
+			links = append(links, Link{link, c.Data})
+			break
+		}
 	}
 }
