@@ -1,4 +1,4 @@
-package type
+package table
 
 type Table struct {
 	PhoneNum   string

@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
+	"./table"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq" //Driver for postgresql
 )
@@ -31,7 +33,10 @@ func Open() (*sql.DB, error) {
 
 func startRouter() {
 	r := mux.NewRouter()
-	r.HandleFunc("/getPhoneNums", getPhoneNums).Methods("GET")
+	r.HandleFunc("/get", getData).Methods("GET")
+	r.HandleFunc("/getPhone/{phonenum}", findPhoneNum).Methods("GET")
+	r.HandleFunc("/deletePhone/{id}", deletePhoneNum).Methods("DELETE")
+	r.HandleFunc("/updatePhone/{id}", updatePhone).Methods("PUT")
 	fmt.Println("Started serving port :8000")
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
@@ -40,26 +45,101 @@ func main() {
 	startRouter()
 }
 
-func getPhoneNums(w http.ResponseWriter, r *http.Request) {
-	phoneNums := getPhoneNumsFromDb()
-	json.NewEncoder(w).Encode(phoneNums)
+func getData(w http.ResponseWriter, r *http.Request) {
+	data := getDataFromDb()
+	json.NewEncoder(w).Encode(data)
 }
 
-func getPhoneNumsFromDb() []string {
+func findPhoneNum(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	tableRow := findPhoneNumInDb(params["phonenum"])
+	json.NewEncoder(w).Encode(tableRow)
+}
+
+func updatePhone(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	t := table.Table{}
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		log.Fatal(err)
+	}
+	json.NewDecoder(r.Body).Decode(&t)
+	t.ID = id
+	tableRow := updatePhoneNumInDb(t)
+	json.NewEncoder(w).Encode(tableRow)
+}
+
+func updatePhoneNumInDb(t table.Table) table.Table {
 	dbase, err := Open()
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, err := dbase.Query("select \"PhoneNum\" from public.\"phone_numbers\" ")
-	phoneNums := make([]string, 0, 8)
+	defer dbase.Close()
+	row := dbase.QueryRow("update public.\"phone_numbers\" set \"PhoneNum\"=$1 where \"Id\"=$2", t.PhoneNum, t.ID)
+	err = row.Scan(&t.PhoneNum, &t.FirstName, &t.SecondName, &t.ThirdName, &t.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return t
+}
+
+func deletePhoneNum(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		panic(err)
+	}
+	t := table.Table{}
+	json.NewDecoder(r.Body).Decode(&t)
+	t.ID = id
+	deletePhoneFromDb(t)
+	json.NewEncoder(w).Encode("DELETE OK")
+}
+
+func deletePhoneFromDb(t table.Table) {
+	dbase, err := Open()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dbase.Close()
+	_, err = dbase.Exec("delete from public.\"phone_numbers\" where \"Id\"=$1;", t.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func findPhoneNumInDb(number string) table.Table {
+	dbase, err := Open()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dbase.Close()
+	var t table.Table
+	row := dbase.QueryRow("select * from public.\"phone_numbers\" where \"PhoneNum\"=$1", number)
+	err = row.Scan(&t.PhoneNum, &t.FirstName, &t.SecondName, &t.ThirdName, &t.ID)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return t
+}
+
+func getDataFromDb() []table.Table {
+	dbase, err := Open()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dbase.Close()
+	rows, err := dbase.Query("select distinct * from public.\"phone_numbers\" ")
+	tableRows := make([]table.Table, 0, 8)
 	for rows.Next() {
-		phoneNum := ""
-		err := rows.Scan(&phoneNum)
+		tableRow := table.Table{}
+		err := rows.Scan(&tableRow.PhoneNum, &tableRow.FirstName,
+			&tableRow.SecondName, &tableRow.ThirdName, &tableRow.ID)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		phoneNums = append(phoneNums, phoneNum)
+		tableRows = append(tableRows, tableRow)
 	}
-	return phoneNums
+	return tableRows
 }
