@@ -75,9 +75,9 @@ func updatePhoneNumInDb(t table.Table) table.Table {
 		log.Fatal(err)
 	}
 	defer dbase.Close()
-	row := dbase.QueryRow("update public.\"phone_numbers\" set \"PhoneNum\"=$1 where \"Id\"=$2", t.PhoneNum, t.ID)
-	err = row.Scan(&t.PhoneNum, &t.FirstName, &t.SecondName, &t.ThirdName, &t.ID)
+	_, err = dbase.Exec("update public.\"phone_numbers\" set \"PhoneNum\"=$1 where \"Id\"=$2", t.PhoneNum, t.ID)
 	if err != nil {
+		fmt.Println("err")
 		log.Fatal(err)
 	}
 	return t
@@ -118,7 +118,11 @@ func findPhoneNumInDb(number string) table.Table {
 	row := dbase.QueryRow("select * from public.\"phone_numbers\" where \"PhoneNum\"=$1", number)
 	err = row.Scan(&t.PhoneNum, &t.FirstName, &t.SecondName, &t.ThirdName, &t.ID)
 	if err != nil {
-		fmt.Println(err)
+		if err == sql.ErrNoRows {
+			t.PhoneNum = ""
+		} else {
+			fmt.Println(err)
+		}
 	}
 	return t
 }

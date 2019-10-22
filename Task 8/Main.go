@@ -14,9 +14,21 @@ import (
 )
 
 func main() {
+	tableRows := getData()
+	fmt.Println(tableRows)
+	for _, t := range tableRows {
+		normalNumber := normalizePhoneNum(t.PhoneNum)
+		if normalNumber != t.PhoneNum {
+			tempRow := findPhoneNum(normalNumber)
+			if tempRow.PhoneNum != "" {
+				deletePhoneNum(t.ID)
+			} else {
+				t.PhoneNum = normalNumber
+				updatePhoneNum(t)
+			}
+		}
+	}
 	fmt.Println(getData())
-	fmt.Println(findPhoneNum("12345"))
-	deletePhoneNum(1)
 }
 
 func normalizePhoneNum(phonenum string) string {
