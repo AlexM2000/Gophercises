@@ -1,14 +1,13 @@
 package deck
 
 import (
+	"math/rand"
 	"sort"
 )
 
 type Suit uint8
 
 type Rank uint8
-
-type Deck []Card
 
 type Card struct {
 	Suit
@@ -59,8 +58,8 @@ func DefaultSort(deck []Card) []Card {
 	return deck
 }
 
-func CustomSort(sorter func(deck Deck) func(i, j int) bool) func(deck Deck) Deck {
-	return func(deck Deck) Deck {
+func CustomSort(sorter func(deck []Card) func(i, j int) bool) func(deck []Card) []Card {
+	return func(deck []Card) []Card {
 		sort.Slice(deck, sorter(deck))
 		return deck
 	}
@@ -70,4 +69,12 @@ func Less(deck []Card) func(i, j int) bool {
 	return func(i, j int) bool {
 		return deck[i].Rank < deck[j].Rank
 	}
+}
+
+func Shuffle(deck []Card) []Card {
+	rand.Shuffle(len(deck),
+		func(i, j int) {
+			deck[i], deck[j] = deck[j], deck[i]
+		})
+	return deck
 }
