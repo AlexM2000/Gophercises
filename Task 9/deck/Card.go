@@ -66,16 +66,8 @@ func CustomSort(sorter func(deck Deck) func(i, j int) bool) func(deck Deck) Deck
 	}
 }
 
-func (deck Deck) Len() int {
-	return len(deck)
-}
-
 func Less(deck []Card) func(i, j int) bool {
 	return func(i, j int) bool {
 		return deck[i].Rank < deck[j].Rank
 	}
-}
-
-func (deck Deck) Swap(i, j int) {
-	deck[i], deck[j] = deck[j], deck[i]
 }
