@@ -1,11 +1,17 @@
 package deck
 
+import (
+	"sort"
+)
+
 type Suit uint8
 
 type Rank uint8
 
+type Deck []Card
+
 type Card struct {
-	Suit 
+	Suit
 	Rank
 }
 
@@ -18,11 +24,10 @@ const (
 	Heart
 )
 
-suits := []Suit{Spade, Diamond, Club, Heart}
-
 const (
-	Six = iota + 5
-	Seven 
+	_ Rank = iota + 4
+	Six
+	Seven
 	Eight
 	Nine
 	Ten
@@ -37,15 +42,7 @@ const (
 	MaxRank = Ace
 )
 
-type lessFunc func(p1, p2 *Card)
-
-type sortDeck struct {
-	deck []Card
-	less []lessFunc
-}
-
-func generateColor(deck []Card, color string) []Card { 
-}
+var suits = []Suit{Spade, Diamond, Club, Heart}
 
 func New() []Card {
 	newDeck := make([]Card, DECKSIZE, DECKSIZE)
@@ -57,21 +54,28 @@ func New() []Card {
 	return newDeck
 }
 
-func (d *sortDeck) Len() int {
-	return len(d.deck)
+func DefaultSort(deck []Card) []Card {
+	sort.Slice(deck, Less(deck))
+	return deck
 }
 
-func (d *sortDeck) Swap(i, j int) {
-	d.deck[i], d.deck[j] = d.deck[j], d.deck[i]
-}
-
-func orderedBy(less ...lessFunc) *sortDeck {
-	return &sortDeck{
-		less: less,
+func CustomSort(sorter func(deck Deck) func(i, j int) bool) func(deck Deck) Deck {
+	return func(deck Deck) Deck {
+		sort.Slice(deck, sorter(deck))
+		return deck
 	}
 }
 
-func (d *sortDeck) Less(i, j int) bool {
-	p, q := &d.deck[i], &d.deck[j]
+func (deck Deck) Len() int {
+	return len(deck)
+}
 
+func Less(deck []Card) func(i, j int) bool {
+	return func(i, j int) bool {
+		return deck[i].Rank < deck[j].Rank
+	}
+}
+
+func (deck Deck) Swap(i, j int) {
+	deck[i], deck[j] = deck[j], deck[i]
 }
