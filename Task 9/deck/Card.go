@@ -43,6 +43,10 @@ const (
 
 var suits = []Suit{Spade, Diamond, Club, Heart}
 
+func (card Card) String() string {
+
+}
+
 func New() []Card {
 	newDeck := make([]Card, DECKSIZE, DECKSIZE)
 	for _, suit := range suits {
@@ -77,4 +81,16 @@ func Shuffle(deck []Card) []Card {
 			deck[i], deck[j] = deck[j], deck[i]
 		})
 	return deck
+}
+
+func FilterOut(f func(card Card) bool) func(deck []Card) []Card {
+	return func(deck []Card) []Card {
+		var filteredDeck []Card
+		for _, card := range deck {
+			if !f(card) {
+				filteredDeck = append(filteredDeck, card)
+			}
+		}
+		return filteredDeck
+	}
 }
