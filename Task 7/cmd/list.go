@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/spf13/cobra"
@@ -15,13 +16,12 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Show all incomplete tasks.",
 	Run: func(cmd *cobra.Command, args []string) {
-			tasks := getTasks()
-			for _, v := range tasks {
-				fmt.Printf("%d. %s \n", v.Id, v.Text)
-			}
-		},
-	}
-
+		tasks := getTasks()
+		for _, v := range tasks {
+			fmt.Printf("%d. %s \n", v.ID, v.Text)
+		}
+	},
+}
 
 func init() {
 	RootCmd.AddCommand(listCmd)
@@ -38,15 +38,19 @@ func getTasks() []db.Task {
 	}
 	defer resp.Body.Close()
 	var tasks []db.Task
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			panic(err)
-		}
-		err = json.Unmarshal(bodyBytes, &tasks)
-		if err != nil {
-			panic(err)
-		}
+	if resp.StatusCode != http.StatusOK {
+		log.Fatal(resp.StatusCode)
+	}
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal(bodyBytes, &tasks)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err != nil {
+		log.Fatal(err)
 	}
 	return tasks
 }

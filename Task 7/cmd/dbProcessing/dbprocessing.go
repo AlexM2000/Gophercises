@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"github.com/gorilla/mux"
 	"net/http"
-	_ "github.com/lib/pq" //Driver for PostgreSQL
 	"strconv"
+
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq" //Driver for PostgreSQL
 
 	"./db"
 )
@@ -22,26 +23,22 @@ const (
 )
 
 func Open() (*sql.DB, error) {
-	info := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
-	db, err := sql.Open("postgres", info)
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return db, err
-}
-
-func StartRouter() {
-	r := mux.NewRouter()
-	r.HandleFunc("/tasks", getTasks).Methods("GET")
-	r.HandleFunc("/tasks/create", createTask).Methods("POST")
-	r.HandleFunc("/tasks/complete/{id}", completeTask).Methods("PUT")
-	fmt.Println("Started serving port 8000")
-	log.Fatal(http.ListenAndServe(":8000", r))
+	return db, nil
 }
 
 func main() {
-	StartRouter()
+	r := mux.NewRouter()
+	r.HandleFunc("/tasks", getTasks).Methods("GET")
+	r.HandleFunc("/tasks/create", createTask).Methods("POST")
+	r.HandleFunc("/tasks/{id}", completeTask).Methods("PUT")
+	fmt.Println("Started serving port 8000")
+	log.Fatal(http.ListenAndServe(":8000", r))
 }
 
 func getTasks(w http.ResponseWriter, r *http.Request) {
@@ -57,13 +54,13 @@ func getTasksFromDb() []db.Task {
 	defer dbase.Close()
 	Tasks := []db.Task{}
 
-	rows, err := dbase.Query("SELECT * from public.\"Listtodo\" where \"DateComplete\" is null")
+	rows, err := dbase.Query("SELECT * from todos where complete is null")
 	if err != nil {
 		panic(err)
 	}
 	for rows.Next() {
 		t := db.Task{}
-		err := rows.Scan(&t.Id, &t.Text, &t.CreateTime, &t.CompleteTime)
+		err := rows.Scan(&t.ID, &t.Text, &t.CreateTime, &t.Complete)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -85,13 +82,13 @@ func createTaskInDb(task db.Task) db.Task {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = dbase.Exec("insert into public.\"Listtodo\"(\"task\") values($1);", task.Text)
+	_, err = dbase.Exec("insert into todos (task) values($1);", task.Text)
 	if err != nil {
 		log.Fatal(err)
 	}
-	row := dbase.QueryRow("select * from public.\"Listtodo\" where \"DateCreate\"=(select max(\"DateCreate\") from public.\"Listtodo\")")
+	row := dbase.QueryRow("select * from todos where date_create=(select max(date_create) from todos)")
 	t := db.Task{}
-	err = row.Scan(&t.Id, &t.Text, &t.CreateTime, &t.CompleteTime)
+	err = row.Scan(&t.ID, &t.Text, &t.CreateTime, &t.Complete)
 	fmt.Println("Scan success")
 	if err != nil {
 		fmt.Println(err)
@@ -107,7 +104,7 @@ func completeTask(w http.ResponseWriter, r *http.Request) {
 	}
 	var completeTask db.Task
 	json.NewDecoder(r.Body).Decode(&completeTask)
-	completeTask.Id = id
+	completeTask.ID = id
 	completedTask := completeTaskInDb(completeTask)
 	json.NewEncoder(w).Encode(completedTask)
 }
@@ -118,13 +115,13 @@ func completeTaskInDb(task db.Task) db.Task {
 		log.Fatal(err)
 	}
 	defer dbase.Close()
-	_, err = dbase.Exec("update public.\"Listtodo\" set \"DateComplete\" = CURRENT_TIMESTAMP where \"Id\" = $1", task.Id)
+	_, err = dbase.Exec("update todos set complete = TRUE where id = $1", task.ID)
 	if err != nil {
 		log.Fatal(err)
 	}
-	row := dbase.QueryRow("select * from public.\"Listtodo\" where \"DateComplete\"=(select max(\"DateComplete\") from public.\"Listtodo\")")
+	row := dbase.QueryRow("select * from todos where id = $1", task.ID)
 	t := db.Task{}
-	err = row.Scan(&t.Id, &t.Text, &t.CreateTime, &t.CompleteTime)
+	err = row.Scan(&t.ID, &t.Text, &t.CreateTime, &t.Complete)
 	fmt.Println("Scan success")
 	if err != nil {
 		fmt.Println(err)
