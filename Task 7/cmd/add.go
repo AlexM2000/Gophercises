@@ -31,16 +31,16 @@ func init() {
 
 func createTask(text string) db.Task {
 	client := &http.Client{}
-	task := db.Task{}
-	task.Text = text
-	task.Id = 0
-	task.CreateTime = time.Now()
+	task := db.Task{
+		Text:       text,
+		CreateTime: time.Now(),
+	}
 	JSONbytes, err := json.Marshal(task)
 	if err != nil {
 		log.Fatal(err)
 	}
 	req, err := http.NewRequest(
-		"POST", "http://localhost:8000/tasks/create", bytes.NewReader(JSONbytes),
+		"POST", "http://localhost:8000/tasks", bytes.NewReader(JSONbytes),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -50,7 +50,7 @@ func createTask(text string) db.Task {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-	task = db.Task{} //initialized with zero value to check if unmarshalling works
+	task = db.Task{}
 	if resp.StatusCode == http.StatusOK {
 		BodyBytes, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
