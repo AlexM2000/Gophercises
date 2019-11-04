@@ -43,7 +43,7 @@ func completeTask(ID int) db.Task {
 		log.Fatal(err)
 	}
 	req, err := http.NewRequest(
-		"PUT", "http://localhost:8000/tasks"+strconv.Itoa(task.ID), bytes.NewReader(JSONbytes),
+		"PUT", "http://localhost:8000/tasks/"+strconv.Itoa(task.ID), bytes.NewReader(JSONbytes),
 	)
 	if err != nil {
 		log.Fatal(err)

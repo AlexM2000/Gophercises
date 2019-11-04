@@ -51,15 +51,16 @@ func createTask(text string) db.Task {
 	}
 	defer resp.Body.Close()
 	task = db.Task{}
-	if resp.StatusCode == http.StatusOK {
-		BodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		err = json.Unmarshal(BodyBytes, &task)
-		if err != nil {
-			log.Fatal(err)
-		}
+	if resp.StatusCode != http.StatusOK {
+		log.Fatal(resp.StatusCode)
+	}
+	BodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal(BodyBytes, &task)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return task
 }
