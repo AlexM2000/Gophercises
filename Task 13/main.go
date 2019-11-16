@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 
@@ -31,25 +33,9 @@ func main() {
 func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		var client hn.Client
-		ids, err := client.TopItems()
+		stories, err := getTopStories(numStories)
 		if err != nil {
-			http.Error(w, "Failed to load top stories", http.StatusInternalServerError)
-			return
-		}
-		var stories []item
-		for _, id := range ids {
-			hnItem, err := client.GetItem(id)
-			if err != nil {
-				continue
-			}
-			item := parseHNItem(hnItem)
-			if isStoryLink(item) {
-				stories = append(stories, item)
-				if len(stories) >= numStories {
-					break
-				}
-			}
+			log.Fatal(err)
 		}
 		data := templateData{
 			Stories: stories,
@@ -61,6 +47,41 @@ func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 			return
 		}
 	})
+}
+
+func getTopStories(numStories int) ([]item, error) {
+	var stories []item
+	var client hn.Client
+	ids, err := client.TopItems()
+	if err != nil {
+		return nil, errors.New("Failed to load stories")
+	}
+	resCh := make(chan result)
+	for i := 0; i < numStories; i++ {
+		go func(i, id int) {
+			hnItem, err := client.GetItem(id)
+			if err != nil {
+				resCh <- result{index: i, err: err}
+			}
+			resCh <- result{index: i, res: parseHNItem(hnItem)}
+		}(i, ids[i])
+	}
+	var results []result
+	for i := 0; i < numStories; i++ {
+		results = append(results, <-resCh)
+	}
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].index < results[j].index
+	})
+	for _, res := range results {
+		if res.err != nil {
+			continue
+		}
+		if isStoryLink(res.res) {
+			stories = append(stories, res.res)
+		}
+	}
+	return stories, nil
 }
 
 func isStoryLink(item item) bool {
@@ -85,4 +106,10 @@ type item struct {
 type templateData struct {
 	Stories []item
 	Time    time.Duration
+}
+
+type result struct {
+	index int
+	res   item
+	err   error
 }
