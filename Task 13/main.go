@@ -15,6 +15,11 @@ import (
 	"github.com/gophercises/quiet_hn/hn"
 )
 
+var (
+	cache   []item
+	timeout time.Time
+)
+
 func main() {
 	// parse flags
 	var port, numStories int
@@ -33,7 +38,7 @@ func main() {
 func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		stories, err := getTopStories(numStories)
+		stories, err := getCachedStories(numStories)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -47,6 +52,19 @@ func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 			return
 		}
 	})
+}
+
+func getCachedStories(numStories int) ([]item, error) {
+	if time.Now().Sub(timeout) < 0 {
+		return cache, nil
+	}
+	stories, err := getTopStories(numStories)
+	if err != nil {
+		return nil, err
+	}
+	cache = stories
+	timeout = time.Now().Add(10 * time.Second)
+	return cache, nil
 }
 
 func getTopStories(numStories int) ([]item, error) {
