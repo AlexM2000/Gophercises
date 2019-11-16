@@ -35,7 +35,7 @@ func Open() (*sql.DB, error) {
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/tasks", getTasks).Methods("GET")
-	r.HandleFunc("/tasks/create", createTask).Methods("POST")
+	r.HandleFunc("/tasks", createTask).Methods("POST")
 	r.HandleFunc("/tasks/{id}", completeTask).Methods("PUT")
 	fmt.Println("Started serving port 8000")
 	log.Fatal(http.ListenAndServe(":8000", r))
