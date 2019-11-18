@@ -10,14 +10,16 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gophercises/quiet_hn/hn"
 )
 
 var (
-	cache   []item
-	timeout time.Time
+	cache      []item
+	timeout    time.Time
+	cacheMutex sync.Mutex
 )
 
 func main() {
@@ -55,6 +57,8 @@ func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 }
 
 func getCachedStories(numStories int) ([]item, error) {
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
 	if time.Now().Sub(timeout) < 0 {
 		return cache, nil
 	}
