@@ -94,3 +94,13 @@ func FilterOut(f func(card Card) bool) func(deck []Card) []Card {
 		return filteredDeck
 	}
 }
+
+func Add(n int) func([]Card) []Card {
+	return func(deck []Card) []Card {
+		var finalDeck []Card
+		for i := 0; i < n; i++ {
+			finalDeck = append(finalDeck, deck...)
+		}
+		return finalDeck
+	}
+}
