@@ -14,17 +14,20 @@ func main() {
 	r.HandleFunc("/panic/", panicDemo)
 	r.HandleFunc("/panic-after/", panicAfterDemo)
 	r.HandleFunc("/", hello)
-	log.Fatal(http.ListenAndServe(":8000", handlerWithPanic(r)))
+	log.Fatal(http.ListenAndServe(":8000", handlerWithPanic(r, false)))
 }
 
-func handlerWithPanic(h http.Handler) http.Handler {
+func handlerWithPanic(h http.Handler, devMode bool) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println(string(debug.Stack()))
 				w.WriteHeader(http.StatusInternalServerError)
+				if devMode {
+					log.Println(string(debug.Stack()))
+					fmt.Fprintln(w, string(debug.Stack()))
+					return
+				}
 				http.Error(w, "Something went wrong", http.StatusInternalServerError)
-				fmt.Fprintln(w, string(debug.Stack()))
 			}
 		}()
 		h.ServeHTTP(w, r)
