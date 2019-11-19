@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"runtime/debug"
 
 	"github.com/gorilla/mux"
 )
@@ -20,8 +21,9 @@ func handlerWithPanic(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println(err)
+				log.Println(string(debug.Stack()))
 				http.Error(w, "Error in server", http.StatusInternalServerError)
+				fmt.Fprintln(w, string(debug.Stack()))
 			}
 		}()
 		h.ServeHTTP(w, r)
