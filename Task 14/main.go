@@ -22,7 +22,8 @@ func handlerWithPanic(h http.Handler) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				log.Println(string(debug.Stack()))
-				http.Error(w, "Error in server", http.StatusInternalServerError)
+				w.WriteHeader(http.StatusInternalServerError)
+				http.Error(w, "Something went wrong", http.StatusInternalServerError)
 				fmt.Fprintln(w, string(debug.Stack()))
 			}
 		}()
